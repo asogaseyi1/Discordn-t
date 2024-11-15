@@ -1,0 +1,11 @@
+[
+    {"timestamp": "2024-10-10 19:12:10", "address": ["127.0.0.1", 65486], "message": "H"},
+    {"timestamp": "2024-10-10 19:12:12", "address": ["127.0.0.1", 65486], "message": "e"},
+    {"timestamp": "2024-10-10 19:12:13", "address": ["127.0.0.1", 65486], "message": "l"},
+    {"timestamp": "2024-10-10 19:12:13", "address": ["127.0.0.1", 65486], "message": "l"},
+    {"timestamp": "2024-10-10 19:12:13", "address": ["127.0.0.1", 65486], "message": "o"}
+]
+Seyi: Hi
+Seyi: What's up
+Seyi: comp 3010 rules!
+Bob: Yessir!

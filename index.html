@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Discordn't</title>
+	<script>
+    	let username = '';
+
+    	// Poll for new messages every 5 seconds
+    	function pollMessages() {
+        	const xhr = new XMLHttpRequest();
+        	xhr.open("GET", "/api/messages", true);
+        	xhr.onload = function() {
+            	if (xhr.status === 200) {
+                	try {
+                    	const messages = JSON.parse(xhr.responseText);
+                    	const messagesDiv = document.getElementById('messages');
+                    	messagesDiv.innerHTML = '';
+                    	messages.forEach(msg => {
+                        	if (msg.trim()) {
+                            	const p = document.createElement('p');
+                            	p.textContent = msg;
+                            	messagesDiv.appendChild(p);
+                        	}
+                    	});
+                	} catch (e) {
+                    	console.error("Failed to parse messages:", e);
+                	}
+            	} else {
+                	console.error("Failed to get messages:", xhr.status, xhr.responseText);
+            	}
+        	};
+        	xhr.send();
+    	}
+
+    	function sendMessage() {
+        	const input = document.getElementById('messageInput');
+        	const message = input.value;  // Ensure this is not empty
+        	const xhr = new XMLHttpRequest();
+        	xhr.open("POST", "/api/messages", true);
+
+        	// Set the Content-Type header before sending the data
+        	xhr.setRequestHeader("Content-Type", "text/plain");
+
+        	xhr.onload = function() {
+            	if (xhr.status === 200) {
+                	pollMessages();  // Refresh messages after sending
+                	input.value = '';  // Clear input field
+            	} else {
+                	console.error('Failed to send message:', xhr.status, xhr.responseText);
+            	}
+        	};
+
+        	xhr.onerror = function() {
+            	console.error('Network error');
+        	};
+
+        	// Log the message to be sent to ensure it's not empty
+        	console.log("Sending message:", message);
+
+        	// Send the message as plain text
+        	xhr.send(message);
+    	}
+
+    	setInterval(pollMessages, 5000);  // Poll every 5 seconds
+
+    	// Submit the login form via XHR
+    	function submitLoginForm(event) {
+        	event.preventDefault();  // Prevent default form submission
+        	username = document.getElementById('usernameInput').value;
+
+        	const xhr = new XMLHttpRequest();
+        	xhr.withCredentials = true;
+        	xhr.open("POST", "/api/login", true);
+        	xhr.setRequestHeader('Content-Type', 'text/plain');  // Change content type to text/plain
+        	xhr.onload = function() {
+            	if (xhr.status === 200) {
+                	document.getElementById('loginDiv').style.display = 'none';
+                	document.getElementById('chatDiv').style.display = 'block';
+                	pollMessages();  // Start polling after login
+            	}
+        	};
+        	xhr.send(username);  // Send username as plain text
+    	}
+
+    	// Submit the message form via XHR
+    	function submitMessageForm(event) {
+        	event.preventDefault();  // Prevent default form submission
+        	const messageInput = document.getElementById('messageInput');
+        	const message = username + ": " + messageInput.value; // Format: "username: message"
+       	 
+        	const xhr = new XMLHttpRequest();
+        	xhr.open("POST", "/api/messages", true);
+        	xhr.setRequestHeader("Content-Type", "text/plain"); // Ensure headers match expected type
+        	xhr.onload = function() {
+            	if (xhr.status === 200) {
+                	pollMessages();  // Refresh messages after posting
+                	messageInput.value = '';  // Clear input
+            	} else {
+                	console.error('Error sending message:', xhr.status, xhr.responseText);
+            	}
+        	};
+        	xhr.onerror = function() {
+            	console.error('Request failed to send due to network error');
+        	};
+        	xhr.send(message);
+    	}
+
+        function logout() {
+            username = '';
+            document.getElementById('chatDiv').style.display = 'none';
+            document.getElementById('loginDiv').style.display = 'block';
+        }
+	</script>
+</head>
+<body>
+	<!-- Login Form -->
+	<div id="loginDiv">
+    	<form onsubmit="submitLoginForm(event)" method="POST">
+        	<input type="text" id="usernameInput" placeholder="Enter your username" required>
+        	<button type="submit">Login</button>
+    	</form>
+	</div>
+
+	<!-- Chat Form -->
+	<div id="chatDiv" style="display: none;">
+    	<div id="messages" style="height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+        	<!-- Messages will display here -->
+    	</div>
+    	<form onsubmit="submitMessageForm(event)" method="POST">
+        	<input type="text" id="messageInput" placeholder="Enter your message" required>
+        	<button type="submit">Send</button>
+    	</form>
+        <button onclick="logout()">Logout</button>
+	</div>
+</body>
+</html>
+
+
